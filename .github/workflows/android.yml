@@ -18,15 +18,23 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    # 关键修改：强制使用 Gradle 8.2 版本，修复 Gradle 9 的不兼容问题
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    # 修复核心：强制使用 Gradle 8.2 且 ⛔️禁用缓存⛔️ 以绕过 GitHub 服务器故障
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
       with:
         gradle-version: '8.2'
+        cache-disabled: true 
+        
+    - name: Create local.properties
+      run: echo "sdk.dir=$ANDROID_HOME" > local.properties
 
+    # 使用更详细的日志模式，如果有错能看清哪里错
     - name: Build with Gradle
-      run: gradle assembleDebug --stacktrace
-      
+      run: gradle assembleDebug --stacktrace --info
+
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
